@@ -1,0 +1,320 @@
+/* 
+ * Shortkeys:
+ *	Ctrl+Space	- content assist
+ * 	F3			- open declaration of selected element
+ *	Alt+S 		- open structure diagram
+ *  Alt+B 		- open behavior diagram
+ *  Alt+M 		- open textual editor (in diagrams)
+ */
+RoomModel TemplateModel {
+
+	import room.basic.types.* from "../../org.eclipse.etrice.modellib.java/model/Types.room"
+	import room.basic.service.timing.* from "../../org.eclipse.etrice.modellib.java/model/TimingService.room"
+	import ContractAnnotations.* from "ContractAnnotations.room"
+
+	LogicalSystem LogSys {
+		SubSystemRef subSystemRef: SubSysClass
+	}
+
+	SubSystemClass SubSysClass {
+		ActorRef topActor: TopActor
+		ActorRef timingService: ATimingService
+		LayerConnection ref topActor satisfied_by timingService.timer
+		LogicalThread defaultThread
+	}
+
+	// - build your application from here
+	ActorClass TopActor {
+		Structure {
+			ActorRef ex1_axis1: AxisController
+			ActorRef ex1_axis2: AxisController
+			ActorRef controller_ex1: Controller_ex1
+			Binding controller_ex1.toAxis1 and ex1_axis1.fct
+			Binding controller_ex1.toAxis2 and ex1_axis2.fct
+
+			ActorRef ex2_axis1: AxisController
+			ActorRef ex2_axis2: AxisController
+			ActorRef controller_ex2: Controller_ex2
+			Binding controller_ex2.toAxis1 and ex2_axis1.fct
+			Binding controller_ex2.toAxis2 and ex2_axis2.fct
+		}
+	}
+
+	ProtocolClass PAxisControl {
+		@InterfaceContract(definingActorClassName = "PAxisControlContract")
+		incoming {
+			Message moveTo(int16)
+			Message halt()
+		}
+		outgoing {
+			Message moveCompleted()
+			Message moveHalted(int16)
+		}
+	}
+
+	ActorClass PAxisControlContract {
+
+		Interface {
+			conjugated Port toUnconjugated: PAxisControl
+			Port toConjugated: PAxisControl
+		}
+		Structure {
+			external Port toUnconjugated
+			external Port toConjugated
+		}
+		Behavior {
+			StateMachine {
+				State idle
+				State moving
+				State haltRequested
+				Transition init0: initial -> idle
+				Transition tr0: idle -> idle {
+					triggers {
+						<halt: toConjugated>
+					}
+				}
+				Transition tr1: idle -> moving {
+					triggers {
+						<moveTo: toConjugated>
+					}
+				}
+				Transition tr2: moving -> haltRequested {
+					triggers {
+						<halt: toConjugated>
+					}
+				}
+				Transition tr3: haltRequested -> idle {
+					triggers {
+						<moveHalted: toUnconjugated>
+					}
+				}
+				Transition tr4: moving -> idle {
+					triggers {
+						<moveCompleted: toUnconjugated>
+					}
+				}
+			}
+		}
+	}
+
+	ActorClass Controller_ex1 {
+
+		// Basic example:
+		// - move halted message is never handled
+		// - move done messages are only handled in one specific order
+		Interface {
+			conjugated Port toAxis1: PAxisControl
+			conjugated Port toAxis2: PAxisControl
+		}
+		Structure {
+			external Port toAxis1
+			external Port toAxis2
+		}
+		Behavior {
+			StateMachine {
+
+				State waiting {
+					entry '''
+						toAxis1.moveTo((short)10);
+						toAxis2.moveTo((short)20);'''
+				}
+
+				Transition init0: initial -> waiting {
+				}
+				State axis1_done
+				State both_done {
+					entry '''
+						toAxis1.moveTo((short)0);
+						toAxis2.moveTo((short)0);'''
+				}
+				State axis1_returned
+
+				Transition tr0: waiting -> axis1_done {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				Transition tr1: axis1_done -> both_done {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr4: both_done -> axis1_returned {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				State axis2_done
+				State axis2_returned
+				Transition tr2: waiting -> axis2_done {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr3: axis2_done -> both_done {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				Transition tr5: both_done -> axis2_returned {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr6: axis2_returned -> waiting {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+					action '''
+						toAxis1.moveTo((short)10);
+						toAxis2.moveTo((short)20);'''
+				}
+				Transition tr7: axis1_returned -> waiting {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+					action '''
+						toAxis1.moveTo((short)10);
+						toAxis2.moveTo((short)20);'''
+				}
+			}
+		}
+	}
+
+	ActorClass Controller_ex2 {
+		Interface {
+			conjugated Port toAxis1: PAxisControl
+			conjugated Port toAxis2: PAxisControl
+		}
+		Structure {
+			external Port toAxis1
+			external Port toAxis2
+		}
+		Behavior {
+			StateMachine {
+				State move1Requested {
+					entry '''
+						toAxis1.moveTo((short)10);
+						toAxis2.moveTo((short)20);'''
+				}
+				State axis1_move1_done
+				State axis2_move1_done
+				State move2Requested {
+					entry '''
+						toAxis1.moveTo((short)0);
+						toAxis2.moveTo((short)0);'''
+				}
+				State axis1_move2_done
+				State axis2_move2_done
+				Transition init0: initial -> move1Requested
+				Transition tr0: move1Requested -> axis1_move1_done {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				Transition tr1: move1Requested -> axis2_move1_done {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr2: axis1_move1_done -> move2Requested {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr3: axis2_move1_done -> move2Requested {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				Transition tr4: move2Requested -> axis1_move2_done {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+				Transition tr5: move2Requested -> axis2_move2_done {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr6: axis1_move2_done -> move1Requested {
+					triggers {
+						<moveCompleted: toAxis2>
+					}
+				}
+				Transition tr7: axis2_move2_done -> move1Requested {
+					triggers {
+						<moveCompleted: toAxis1>
+					}
+				}
+			}
+		}
+	}
+
+	ActorClass AxisController {
+		Interface {
+			Port fct: PAxisControl
+		}
+		Structure {
+			SAP timer: PTimer
+			external Port fct
+			Attribute currentPosition: int16
+			Attribute currentMoveTarget: int16
+		}
+		Behavior {
+			StateMachine {
+				State idle
+				State moving
+				Transition init0: initial -> idle {
+					action '''
+						currentPosition = 0;
+						currentMoveTarget = 0;'''
+				}
+				Transition tr0: idle -> idle {
+					triggers {
+						<halt: fct>
+					}
+				}
+				Transition tr1: idle -> moving {
+					triggers {
+						<moveTo: fct>
+					}
+					action '''
+						currentMoveTarget = transitionData;
+						timer.startTimer(10);'''
+				}
+				Transition moveUp: moving -> moving {
+					triggers {
+						<timeout: timer guard '''currentPosition < currentMoveTarget'''>
+					}
+					action '''
+						currentPosition++;
+						timer.startTimer(10);'''
+				}
+				Transition moveDown: moving -> moving {
+					triggers {
+						<timeout: timer guard '''currentPosition > currentMoveTarget'''>
+					}
+					action '''
+						currentPosition--;
+						timer.startTimer(10);'''
+				}
+				Transition moveDone: moving -> idle {
+					triggers {
+						<timeout: timer guard '''currentPosition == currentMoveTarget'''>
+					}
+					action '''fct.moveCompleted();'''
+				}
+				Transition tr2: moving -> idle {
+					triggers {
+						<halt: fct>
+					}
+					action '''
+						timer.kill();
+						currentMoveTarget = currentPosition;
+						fct.moveHalted(currentPosition);'''
+				}
+			}
+		}
+	}
+}

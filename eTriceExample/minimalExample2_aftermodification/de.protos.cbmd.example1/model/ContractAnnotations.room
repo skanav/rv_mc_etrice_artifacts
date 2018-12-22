@@ -1,0 +1,8 @@
+RoomModel ContractAnnotations {
+
+	AnnotationType InterfaceContract {
+		target = ProtocolClass
+		mandatory attribute definingActorClassName: ptCharacter
+	}
+}
+

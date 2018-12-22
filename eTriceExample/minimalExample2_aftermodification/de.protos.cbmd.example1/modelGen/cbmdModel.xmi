@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="ASCII"?>
+<contractmodel:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:contractmodel="org.cbmd.core.contractmodel" root="//@components.0">
+  <interfaces name="PAxisControl">
+    <events xsi:type="contractmodel:ReceiveMessage" name="moveTo">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:SignedInteger16" name="int16"/>
+      </data>
+    </events>
+    <events xsi:type="contractmodel:ReceiveMessage" name="halt"/>
+    <events xsi:type="contractmodel:SendMessage" name="moveCompleted"/>
+    <events xsi:type="contractmodel:SendMessage" name="moveHalted">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:SignedInteger16" name="int16"/>
+      </data>
+    </events>
+    <contract>
+      <psm initial="//@interfaces.0/@contract/@psm/@states.0">
+        <states name="idle">
+          <transitions target="//@interfaces.0/@contract/@psm/@states.0">
+            <trigger event="//@interfaces.0/@events.1"/>
+          </transitions>
+          <transitions target="//@interfaces.0/@contract/@psm/@states.1">
+            <trigger event="//@interfaces.0/@events.0"/>
+          </transitions>
+        </states>
+        <states name="moving">
+          <transitions target="//@interfaces.0/@contract/@psm/@states.2">
+            <trigger event="//@interfaces.0/@events.1"/>
+          </transitions>
+          <transitions target="//@interfaces.0/@contract/@psm/@states.0">
+            <trigger event="//@interfaces.0/@events.2"/>
+          </transitions>
+        </states>
+        <states name="haltRequested">
+          <transitions target="//@interfaces.0/@contract/@psm/@states.0">
+            <trigger event="//@interfaces.0/@events.3"/>
+          </transitions>
+        </states>
+      </psm>
+    </contract>
+  </interfaces>
+  <interfaces name="PTimer">
+    <events xsi:type="contractmodel:ReceiveMessage" name="kill"/>
+    <events xsi:type="contractmodel:ReceiveMessage" name="internalStartTimer">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:Integer" name="TimerData"/>
+      </data>
+    </events>
+    <events xsi:type="contractmodel:ReceiveMessage" name="internalStartTimeout">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:Integer" name="TimerData"/>
+      </data>
+    </events>
+    <events xsi:type="contractmodel:SendMessage" name="timeout"/>
+    <events xsi:type="contractmodel:SendMessage" name="internalTimer">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:Integer" name="TimerData"/>
+      </data>
+    </events>
+    <events xsi:type="contractmodel:SendMessage" name="internalTimeout">
+      <data name="transitionData">
+        <type xsi:type="contractmodel:Integer" name="TimerData"/>
+      </data>
+    </events>
+  </interfaces>
+  <components xsi:type="contractmodel:Component" name="LogSys">
+    <componentRefs name="subSystemRef" component="//@components.1"/>
+  </components>
+  <components xsi:type="contractmodel:Component" name="subSystemRef">
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.1/@componentRefs.0" fromPort="//@components.2/@ports.0" toComponent="//@components.1/@componentRefs.1" toPort="//@components.6/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.1/@componentRefs.0" fromPort="//@components.2/@ports.1" toComponent="//@components.1/@componentRefs.1" toPort="//@components.6/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.1/@componentRefs.0" fromPort="//@components.2/@ports.2" toComponent="//@components.1/@componentRefs.1" toPort="//@components.6/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.1/@componentRefs.0" fromPort="//@components.2/@ports.3" toComponent="//@components.1/@componentRefs.1" toPort="//@components.6/@ports.0"/>
+    <componentRefs name="topActor" component="//@components.2"/>
+    <componentRefs name="timingService" component="//@components.6"/>
+  </components>
+  <components xsi:type="contractmodel:Component" name="TopActor">
+    <ports xsi:type="contractmodel:RequiredPort" name="import-ex1_axis1-timer" interface="//@interfaces.1"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="import-ex1_axis2-timer" interface="//@interfaces.1"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="import-ex2_axis1-timer" interface="//@interfaces.1"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="import-ex2_axis2-timer" interface="//@interfaces.1"/>
+    <connectors xsi:type="contractmodel:ImportConnector" innerComponent="//@components.2/@componentRefs.0" innerPort="//@components.3/@ports.1" outerPort="//@components.2/@ports.0"/>
+    <connectors xsi:type="contractmodel:ImportConnector" innerComponent="//@components.2/@componentRefs.1" innerPort="//@components.3/@ports.1" outerPort="//@components.2/@ports.1"/>
+    <connectors xsi:type="contractmodel:ImportConnector" innerComponent="//@components.2/@componentRefs.3" innerPort="//@components.3/@ports.1" outerPort="//@components.2/@ports.2"/>
+    <connectors xsi:type="contractmodel:ImportConnector" innerComponent="//@components.2/@componentRefs.4" innerPort="//@components.3/@ports.1" outerPort="//@components.2/@ports.3"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.2/@componentRefs.2" fromPort="//@components.4/@ports.0" toComponent="//@components.2/@componentRefs.0" toPort="//@components.3/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.2/@componentRefs.2" fromPort="//@components.4/@ports.1" toComponent="//@components.2/@componentRefs.1" toPort="//@components.3/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.2/@componentRefs.5" fromPort="//@components.5/@ports.0" toComponent="//@components.2/@componentRefs.3" toPort="//@components.3/@ports.0"/>
+    <connectors xsi:type="contractmodel:AssemblyConnector" fromComponent="//@components.2/@componentRefs.5" fromPort="//@components.5/@ports.1" toComponent="//@components.2/@componentRefs.4" toPort="//@components.3/@ports.0"/>
+    <componentRefs name="ex1_axis1" component="//@components.3"/>
+    <componentRefs name="ex1_axis2" component="//@components.3"/>
+    <componentRefs name="controller_ex1" component="//@components.4"/>
+    <componentRefs name="ex2_axis1" component="//@components.3"/>
+    <componentRefs name="ex2_axis2" component="//@components.3"/>
+    <componentRefs name="controller_ex2" component="//@components.5"/>
+  </components>
+  <components xsi:type="contractmodel:LeafComponent" name="AxisController">
+    <ports xsi:type="contractmodel:ProvidedPort" name="fct" interface="//@interfaces.0"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="timer" interface="//@interfaces.1"/>
+    <behavior initial="//@components.3/@behavior/@states.0">
+      <states name="preInitState">
+        <transitions target="//@components.3/@behavior/@states.1">
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+      </states>
+      <states name="idle">
+        <transitions target="//@components.3/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.1" port="//@components.3/@ports.0"/>
+        </transitions>
+        <transitions target="//@components.3/@behavior/@states.2">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.0" port="//@components.3/@ports.0"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+      </states>
+      <states name="moving">
+        <transitions target="//@components.3/@behavior/@states.2">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.3" port="//@components.3/@ports.1"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+        <transitions target="//@components.3/@behavior/@states.2">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.3" port="//@components.3/@ports.1"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+        <transitions target="//@components.3/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.3" port="//@components.3/@ports.1"/>
+          <action>
+            <statements xsi:type="contractmodel:Block">
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.3/@ports.0" message="//@interfaces.0/@events.2"/>
+            </statements>
+          </action>
+        </transitions>
+        <transitions target="//@components.3/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.1" port="//@components.3/@ports.0"/>
+          <action>
+            <statements xsi:type="contractmodel:Block">
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.3/@ports.0" message="//@interfaces.0/@events.3"/>
+            </statements>
+          </action>
+        </transitions>
+      </states>
+    </behavior>
+  </components>
+  <components xsi:type="contractmodel:LeafComponent" name="Controller_ex1">
+    <ports xsi:type="contractmodel:RequiredPort" name="toAxis1" interface="//@interfaces.0"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="toAxis2" interface="//@interfaces.0"/>
+    <behavior initial="//@components.4/@behavior/@states.0">
+      <states name="preInitState">
+        <transitions target="//@components.4/@behavior/@states.1">
+          <action>
+            <statements xsi:type="contractmodel:Block">
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.0" message="//@interfaces.0/@events.0">
+                <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                  <value xsi:type="contractmodel:IntegerConstant" value="10"/>
+                </parameterValues>
+              </statements>
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.1" message="//@interfaces.0/@events.0">
+                <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                  <value xsi:type="contractmodel:IntegerConstant" value="20"/>
+                </parameterValues>
+              </statements>
+            </statements>
+          </action>
+        </transitions>
+      </states>
+      <states name="move1Requested">
+        <transitions target="//@components.4/@behavior/@states.3">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.4/@ports.0"/>
+        </transitions>
+      </states>
+      <states name="axis1_move2_done">
+        <transitions target="//@components.4/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.4/@ports.1"/>
+          <action>
+            <statements xsi:type="contractmodel:Block">
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.0" message="//@interfaces.0/@events.0">
+                <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                  <value xsi:type="contractmodel:IntegerConstant" value="10"/>
+                </parameterValues>
+              </statements>
+              <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.1" message="//@interfaces.0/@events.0">
+                <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                  <value xsi:type="contractmodel:IntegerConstant" value="20"/>
+                </parameterValues>
+              </statements>
+            </statements>
+          </action>
+        </transitions>
+      </states>
+      <states name="axis1_move1_done">
+        <transitions target="//@components.4/@behavior/@states.4">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.4/@ports.1"/>
+        </transitions>
+        <transitions target="//@components.4/@behavior/@states.4">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.4/@ports.0"/>
+        </transitions>
+      </states>
+      <states name="move2Requested">
+        <transitions target="//@components.4/@behavior/@states.2">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.4/@ports.0"/>
+        </transitions>
+        <entry>
+          <statements xsi:type="contractmodel:Block">
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.0" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="0"/>
+              </parameterValues>
+            </statements>
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.4/@ports.1" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="0"/>
+              </parameterValues>
+            </statements>
+          </statements>
+        </entry>
+      </states>
+    </behavior>
+  </components>
+  <components xsi:type="contractmodel:LeafComponent" name="Controller_ex2">
+    <ports xsi:type="contractmodel:RequiredPort" name="toAxis1" interface="//@interfaces.0"/>
+    <ports xsi:type="contractmodel:RequiredPort" name="toAxis2" interface="//@interfaces.0"/>
+    <behavior initial="//@components.5/@behavior/@states.0">
+      <states name="move1Requested">
+        <transitions target="//@components.5/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.0"/>
+        </transitions>
+        <transitions target="//@components.5/@behavior/@states.2">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.1"/>
+        </transitions>
+        <entry>
+          <statements xsi:type="contractmodel:Block">
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.5/@ports.0" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="10"/>
+              </parameterValues>
+            </statements>
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.5/@ports.1" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="20"/>
+              </parameterValues>
+            </statements>
+          </statements>
+        </entry>
+      </states>
+      <states name="axis1_move1_done">
+        <transitions target="//@components.5/@behavior/@states.3">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.1"/>
+        </transitions>
+      </states>
+      <states name="axis2_move1_done">
+        <transitions target="//@components.5/@behavior/@states.3">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.0"/>
+        </transitions>
+      </states>
+      <states name="move2Requested">
+        <transitions target="//@components.5/@behavior/@states.4">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.0"/>
+        </transitions>
+        <transitions target="//@components.5/@behavior/@states.5">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.1"/>
+        </transitions>
+        <entry>
+          <statements xsi:type="contractmodel:Block">
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.5/@ports.0" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="0"/>
+              </parameterValues>
+            </statements>
+            <statements xsi:type="contractmodel:SendMessageStatement" port="//@components.5/@ports.1" message="//@interfaces.0/@events.0">
+              <parameterValues parameter="//@interfaces.0/@events.0/@data.0">
+                <value xsi:type="contractmodel:IntegerConstant" value="0"/>
+              </parameterValues>
+            </statements>
+          </statements>
+        </entry>
+      </states>
+      <states name="axis1_move2_done">
+        <transitions target="//@components.5/@behavior/@states.0">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.1"/>
+        </transitions>
+      </states>
+      <states name="axis2_move2_done">
+        <transitions target="//@components.5/@behavior/@states.0">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.0/@events.2" port="//@components.5/@ports.0"/>
+        </transitions>
+      </states>
+    </behavior>
+  </components>
+  <components xsi:type="contractmodel:LeafComponent" name="ATimingService">
+    <ports xsi:type="contractmodel:ProvidedPort" name="timer" interface="//@interfaces.1"/>
+    <behavior initial="//@components.6/@behavior/@states.0">
+      <states name="preInitState">
+        <transitions target="//@components.6/@behavior/@states.1">
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+      </states>
+      <states name="Operational">
+        <transitions target="//@components.6/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.1" port="//@components.6/@ports.0"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+        <transitions target="//@components.6/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.2" port="//@components.6/@ports.0"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+        <transitions target="//@components.6/@behavior/@states.1">
+          <trigger xsi:type="contractmodel:PortTrigger" event="//@interfaces.1/@events.0" port="//@components.6/@ports.0"/>
+          <action>
+            <statements xsi:type="contractmodel:Block"/>
+          </action>
+        </transitions>
+        <entry>
+          <statements xsi:type="contractmodel:Block"/>
+        </entry>
+      </states>
+    </behavior>
+  </components>
+</contractmodel:Model>

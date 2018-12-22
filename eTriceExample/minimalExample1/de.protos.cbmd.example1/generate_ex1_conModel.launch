@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="de.protos.cbmd.modeltransformator.launch.launchConfigurationType">
+    <listAttribute key="ModelFiles">
+        <listEntry value="${workspace_loc:/de.protos.cbmd.example1/model/Mapping.etmap}"/>
+    </listAttribute>
+    <stringAttribute key="org.eclipse.debug.core.ATTR_REFRESH_SCOPE" value="${workspace}"/>
+</launchConfiguration>

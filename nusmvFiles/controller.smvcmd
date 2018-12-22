@@ -1,0 +1,9 @@
+read_model -i "controller.smv"
+set on_failure_script_quits 1
+set default_trace_plugin 4
+flatten_hierarchy
+encode_variables
+build_model
+check_ctlspec
+check_ltlspec
+quit

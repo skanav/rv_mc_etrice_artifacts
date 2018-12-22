@@ -1,0 +1,108 @@
+MODULE MainController(toAxis1In, toAxis2In)
+	VAR
+		toAxis1Out : { moveTo, halt, noMsg };
+		toAxis2Out : { moveTo, halt, noMsg };
+		state : {axis1_done, waiting, axis2_done, both_done, preWaiting,  axis1_returned, axis2_returned};
+
+	DEFINE
+		init0 := (state = preWaiting);
+		tr0 := ((state = waiting) & (toAxis1In = moveCompleted));
+		tr1 := ((state = axis1_done) & (toAxis2In = moveCompleted));
+		tr2 := ((state = waiting) & (toAxis2In = moveCompleted));
+		tr3 := ((state = axis2_done) & (toAxis1In = moveCompleted));
+		tr4 := ((state = both_done) & (toAxis1In = moveCompleted));
+		tr5 := ((state = both_done) & (toAxis2In = moveCompleted));
+		tr6 := ((state = axis1_returned) & (toAxis2In = moveCompleted));
+		tr7 := ((state = axis2_returned) & (toAxis1In = moveCompleted));
+
+	ASSIGN
+		init(toAxis1Out) := noMsg;
+		init(toAxis2Out) := noMsg;
+		init(state) := preWaiting;
+		next(state) := 
+			case
+				init0 : waiting;
+				tr0 : axis1_done;
+				tr1 : both_done;
+				tr2 : axis2_done;
+				tr3 : both_done;
+				tr4 : axis1_returned;
+				tr5: axis2_returned;
+				tr6: preWaiting;
+				tr7: preWaiting;
+				TRUE : state;
+			esac;
+		next(toAxis1Out) := 
+			case
+				init0 : moveTo;
+				tr1: moveTo;
+				tr3: moveTo;
+				tr6 : moveTo;
+				tr7 : moveTo;
+				TRUE : noMsg;
+			esac;
+		next(toAxis2Out) := 
+			case
+				init0 : moveTo;
+				tr1: moveTo;
+				tr3: moveTo;
+				tr6 : moveTo;
+				tr7 : moveTo;
+				TRUE : noMsg;
+			esac;
+			
+	-- SPEC AG ((state != axis1_done))
+	-- SPEC AG ((state != waiting))
+	-- SPEC AG ((state != axis2_done))
+	-- SPEC AG ((state != both_done))
+	-- SPEC AG ((state != axis1_returned))
+	-- SPEC AG ((state != axis2_returned))
+
+
+MODULE MainControllerCon(toAxis1In, toAxis2In)
+	VAR
+		state : { idle, haltRequested, error, moving };
+		inst : MainController(toAxis1InForward,toAxis2In);
+
+	DEFINE
+		tr0 := ((state = idle) & (toAxis1Out = halt));
+		tr1 := ((state = idle) & (toAxis1Out = moveTo));
+		tr2 := ((state = moving) & (toAxis1In = halt));
+		tr3 := ((state = haltRequested) & (toAxis1In = moveHalted));
+		tr4 := ((state = moving) & (toAxis1In = moveCompleted));
+		toAxis1Out := inst.toAxis1Out;
+		toAxis1InForward := 
+			case
+				((tr2 | tr3) | tr4) : toAxis1In;
+				TRUE : noMsg;
+			esac;
+
+	ASSIGN
+		init(state) := idle;
+		next(state) := 
+			case
+				tr0 : idle;
+				tr1 : moving;
+				tr2 : haltRequested;
+				tr3 : idle;
+				tr4 : idle;
+				(toAxis1Out != noMsg) : error;
+				TRUE : state;
+			esac;
+		
+
+	SPEC AG ((state != error))
+
+	--LTLSPEC G (F (state = idle))
+	--LTLSPEC G (F (state = moving))
+	--SPEC AG ((state != moving))
+	
+
+MODULE main
+	VAR
+		toAxis1In : { moveCompleted, moveHalted, noMsg};
+		toAxis2In : { moveCompleted, moveHalted, noMsg};
+		inst : MainControllerCon(toAxis1In,toAxis2In);
+
+
+
